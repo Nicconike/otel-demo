@@ -1,7 +1,8 @@
-"""Demo App using Flask"""
+"""Demo App using Flask, OpenTelemetry and Prometheus"""
 
+import os
 import requests
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, Response
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -10,27 +11,49 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.semconv.resource import ResourceAttributes
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, Counter
 
-# Initialize tracing and an exporter that can send data to an OTLP endpoint
+# Read OTLP Endpoint from environment
+OTLP_ENDPOINT = os.environ.get(
+    "OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4318"
+)
+
+# OpenTelemetry Setup
 resource = Resource(attributes={ResourceAttributes.SERVICE_NAME: "flask-demo-app"})
-
 provider = TracerProvider(resource=resource)
-processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://otel-collector:4317"))
+processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=OTLP_ENDPOINT, insecure=True))
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
-
-# Create a tracer
 tracer = trace.get_tracer(__name__)
 
+# Flask App
 app = Flask(__name__)
 
-# Instrument Flask
+# Automatically instrument Flask
 FlaskInstrumentor().instrument_app(app)
 
-# Instrument requests
+# Automatically instrument requests
 RequestsInstrumentor().instrument()
 
+# Prometheus Metrics Setup
+REQUEST_COUNTER = Counter(
+    "http_requests_total", "Total HTTP requests", ["endpoint", "method"]
+)
 
+
+@app.before_request
+def before_request():
+    """Before Request"""
+    REQUEST_COUNTER.labels(endpoint=request.endpoint, method=request.method).inc()
+
+
+@app.route("/metrics")
+def metrics():
+    """Get Prometheus Metrics"""
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
+
+
+# Routes
 @app.route("/")
 def hello():
     """Test Function"""
@@ -51,7 +74,6 @@ def get_users():
                 {"id": user["id"], "name": user["name"], "email": user["email"]}
                 for user in users
             ]
-
             return jsonify({"users": simplified_users})
         except requests.RequestException as e:
             app.logger.error("Error fetching users: %s", str(e))

@@ -2,54 +2,53 @@ services:
     app:
         build: .
         ports:
-        - "5000:5000"
+            - "5000:5000"
         environment:
-        - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+            - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+            - OTEL_LOG_LEVEL=debug
         depends_on:
-        - otel-collector
+            - otel-collector
 
     otel-collector:
         image: otel/opentelemetry-collector-contrib:latest
         command: ["--config=/etc/otel_collector_config.yml"]
         volumes:
-            - ./otel_collector_config.yml:/etc/otel_collector_config.yml:ro
+            - ./otel_collector_config.yml:/etc/otel_collector_config.yml
         ports:
-            - "4317:4317" # OTLP gRPC receiver
-            - "4318:4318" # OTLP http receiver
-            - "8888:8888" # Prometheus metrics exposed by the collector
-            - "8889:8889" # Prometheus exporter metrics
+            - "4320:4318"
+            - "8889:8889"
 
     prometheus:
         image: prom/prometheus:latest
         volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
         ports:
-        - "9090:9090"
+            - "9090:9090"
 
     loki:
         image: grafana/loki:latest
         ports:
-        - "3100:3100"
+            - "3100:3100"
         command: -config.file=/etc/loki/local-config.yml
         volumes:
-        - ./loki-config.yml:/etc/loki/local-config.yml
+            - ./loki-config.yml:/etc/loki/local-config.yml
 
     tempo:
         image: grafana/tempo:latest
         command: ["-config.file=/etc/tempo.yml"]
         volumes:
-        - ./tempo.yml:/etc/tempo.yml
+            - ./tempo.yml:/etc/tempo.yml
         ports:
-        - "3200:3200"
-        - "4317"
+            - "3200:3200"
+            - "4318:4318"
 
     grafana:
         image: grafana/grafana:latest
         volumes:
-        - ./grafana/provisioning:/etc/grafana/provisioning
+            - ./grafana/provisioning:/etc/grafana/provisioning
         environment:
-        - GF_AUTH_ANONYMOUS_ENABLED=true
-        - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-        - GF_AUTH_DISABLE_LOGIN_FORM=true
+            - GF_AUTH_ANONYMOUS_ENABLED=true
+            - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+            - GF_AUTH_DISABLE_LOGIN_FORM=true
         ports:
-        - "3000:3000"
+            - "3000:3000"

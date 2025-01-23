@@ -74,6 +74,9 @@ The docker-compose.yml file orchestrates all services:
 5. Run `docker-compose up -d` to build the Flask app image & start all services
 6. Check if all containers are running with `docker-compose ps`. You should see containers for Flask app, OpenTelemetry Collector, Prometheus, Loki, Tempo and Grafana
 
+After all the containers are up and running it would look something like below
+![Docker](https://github.com/Nicconike/otel-demo/blob/master/assets/docker_desktop.png)
+
 ## Testing the Setup
 1. Access the Flask application at http://localhost:5000 where the homepage can be seen
 2. Generate some test data:
@@ -94,6 +97,7 @@ The docker-compose.yml file orchestrates all services:
         - Create a new dashboard
         - Add a panel with Prometheus as the data source
         - Query example: `rate(http_requests_total[5m])`
+        ![Prometheus](https://github.com/Nicconike/otel-demo/blob/master/assets/prometheus.png)
     - Logs Dashboard:
         - Create a new dashboard
         - Add a logs panel with Loki as the data source
@@ -102,6 +106,8 @@ The docker-compose.yml file orchestrates all services:
         - Use the Explore view in Grafana
         - Select Tempo as the data source
         - Search for traces by service name or duration
+    Dashboard (Incomplete)
+    ![Dashboard](https://github.com/Nicconike/otel-demo/blob/master/assets/dashboard.png)
 4. Analyze the data:
     - Look for patterns in request rates and response times
     - Investigate any error logs
