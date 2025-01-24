@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+    - name: "Local Dashboards"
+      folder: "Observability"
+      type: file
+      updateIntervalSeconds: 5
+      options:
+          path: /etc/grafana/provisioning/dashboards
+      allowUiUpdates: true

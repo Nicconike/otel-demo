@@ -1,0 +1,73 @@
+{
+    "id": null,
+    "uid": "obs-all-in-one",
+    "title": "Observability Overview",
+    "tags": [
+        "demo"
+    ],
+    "timezone": "",
+    "schemaVersion": 37,
+    "version": 1,
+    "panels": [
+        {
+            "type": "timeseries",
+            "title": "HTTP Request Rate (Prometheus)",
+            "datasource": "Prometheus",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "rate(http_requests_total[5m])",
+                    "legendFormat": "{{endpoint}}",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "type": "logs",
+            "title": "Flask Logs (Loki)",
+            "datasource": "Loki",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "targets": [
+                {
+                    "expr": "{job=\"my-flask-app\"}",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "type": "trace",
+            "title": "Tempo Trace Panel",
+            "datasource": "Tempo",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 16
+            },
+            "targets": [
+                {
+                    "queryType": "traceId",
+                    "query": "",
+                    "refId": "C"
+                }
+            ],
+            "options": {
+                "showHeader": true,
+                "showSearch": true,
+                "search": {
+                    "selectedService": "flask-demo-app"
+                }
+            }
+        }
+    ]
+}

@@ -11,9 +11,9 @@ services:
 
     otel-collector:
         image: otel/opentelemetry-collector-contrib:latest
-        command: ["--config=/etc/otel_collector_config.yml"]
+        command: ["--config=/etc/otel-collector-config.yml"]
         volumes:
-            - ./otel_collector_config.yml:/etc/otel_collector_config.yml
+            - ./otel-collector-config.yml:/etc/otel-collector-config.yml
         ports:
             - "4320:4318"
             - "8889:8889"
@@ -46,9 +46,27 @@ services:
         image: grafana/grafana:latest
         volumes:
             - ./grafana/provisioning:/etc/grafana/provisioning
+            - ./grafana-data:/var/lib/grafana
         environment:
             - GF_AUTH_ANONYMOUS_ENABLED=true
             - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
             - GF_AUTH_DISABLE_LOGIN_FORM=true
         ports:
             - "3000:3000"
+        depends_on:
+            - prometheus
+            - loki
+            - tempo
+
+    promtail:
+        image: grafana/promtail:latest
+        volumes:
+            - ./promtail-config.yml:/etc/promtail/config.yml
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        # Optional: For reading actual container log files:
+        # - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        command: -config.file=/etc/promtail/config.yml
+        depends_on:
+            - loki
+        networks:
+            - default

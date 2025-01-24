@@ -17,7 +17,8 @@ The Flask application is instrumented with OpenTelemetry to generate traces, met
 - Implements a custom /api/users endpoint that makes an external API call
 - Configures OpenTelemetry to send data to the OpenTelemetry Collector
 
-### The Dockerfile is used to build the Docker image for our Flask application. It specifies:
+### Dockerfile
+The Dockerfile is used to build the Docker image for our Flask application. It specifies:
 - The base image (Python 3.12 slim version)
 - The working directory in the container
 - Install dependencies
