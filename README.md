@@ -162,9 +162,11 @@ Dashboard (Incomplete)
 4. Explore Mode
     - **Metrics:** Explore with Prometheus. Example query:
     `rate(http_requests_total[1m])`
+    ![Prometheus Metrics](https://github.com/Nicconike/otel-demo/blob/master/assets/metrics.png)
     - **Logs:** Explore with Loki. Example query:
     `{job="my-flask-app"}`
-    - `Traces:` Explore with Tempo. Filter by the service name defined in `app.py` (flask-demo-app)
+    ![Logs](https://github.com/Nicconike/otel-demo/blob/master/assets/container_logs.png)
+    - **Traces:** Explore with Tempo. Filter by the service name defined in `app.py` (flask-demo-app)
 
 ## Persistent Data and Dashboards
 - **Promtail** config is purely in `promtail-config.yml`
