@@ -22,25 +22,30 @@ services:
         image: prom/prometheus:latest
         volumes:
             - ./prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus-data:/prometheus
         ports:
             - "9090:9090"
 
     loki:
         image: grafana/loki:latest
+        command: -config.file=/etc/loki/local-config.yml
         ports:
             - "3100:3100"
-        command: -config.file=/etc/loki/local-config.yml
         volumes:
             - ./loki-config.yml:/etc/loki/local-config.yml
+            - loki-data:/loki
+        user: "0"
 
     tempo:
         image: grafana/tempo:latest
         command: ["-config.file=/etc/tempo.yml"]
-        volumes:
-            - ./tempo.yml:/etc/tempo.yml
         ports:
             - "3200:3200"
+            - "4317:4317"
             - "4318:4318"
+        volumes:
+            - ./tempo.yml:/etc/tempo.yml
+            - tempo-data:/var/tempo
 
     grafana:
         image: grafana/grafana:latest
@@ -63,10 +68,11 @@ services:
         volumes:
             - ./promtail-config.yml:/etc/promtail/config.yml
             - /var/run/docker.sock:/var/run/docker.sock:ro
-        # Optional: For reading actual container log files:
-        # - /var/lib/docker/containers:/var/lib/docker/containers:ro
         command: -config.file=/etc/promtail/config.yml
         depends_on:
             - loki
-        networks:
-            - default
+
+volumes:
+    loki-data:
+    tempo-data:
+    prometheus-data:
